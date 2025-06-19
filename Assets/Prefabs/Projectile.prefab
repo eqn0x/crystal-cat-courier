@@ -49,7 +49,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damage: 10
   health: 0
-  maxHealth: 1
+  maxHealth: 2
   maxDistance: 10
 --- !u!50 &7675197061954126863
 Rigidbody2D:
