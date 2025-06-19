@@ -439,8 +439,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
-  _camera: {fileID: 519420031}
-  _crosshair: {fileID: 716289568}
+  playerCamera: {fileID: 519420031}
+  crosshair: {fileID: 716289568}
+  projectileSpeed: 20
   projectilePrefab: {fileID: 63713397940523145, guid: 68012fcd39020f946be600ce8aeee953, type: 3}
 --- !u!50 &232637342
 Rigidbody2D:

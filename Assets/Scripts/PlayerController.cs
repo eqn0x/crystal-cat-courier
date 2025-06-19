@@ -8,14 +8,16 @@ public class PlayerController : MonoBehaviour
 {
 
     [SerializeField]private float moveSpeed = 5f;
-    private Rigidbody2D _rb;
+    [SerializeField] private Camera playerCamera;
+    [SerializeField] private Transform crosshair;
+    [SerializeField] private float projectileSpeed = 4f;
+    private Rigidbody2D rb;
     private Vector2 moveInput;
     private Vector2 animationVector;
     private Vector2 lookVector;
-    [SerializeField] private Camera _camera;
-    [SerializeField] private Transform _crosshair;
-    private bool _is_walking;
-    private bool _is_walking_backwards;
+    private bool isWalking;
+    private bool isWalkingBackwards;
+    
 
     [SerializeField] private GameObject projectilePrefab;
 
@@ -24,27 +26,27 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        _rb = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
         Cursor.visible = false;
     }
 
     void Update()
     {
-        _rb.velocity = moveInput * moveSpeed * (_is_walking_backwards ? 0.8f : 1);
+        rb.velocity = moveInput * moveSpeed * (isWalkingBackwards ? 0.8f : 1);
         
     }
 
     public void Move(InputAction.CallbackContext context)
     {
-        _is_walking = true;
+        isWalking = true;
 
         if (context.canceled)
         {
-            _is_walking = false;
+            isWalking = false;
         }
 
-        _animator.SetBool("isWalking", _is_walking);
+        _animator.SetBool("isWalking", isWalking);
         moveInput = context.ReadValue<Vector2>();
 
 
@@ -54,8 +56,8 @@ public class PlayerController : MonoBehaviour
 
     public void Look(InputAction.CallbackContext context)
     {
-        _crosshair.SetPositionAndRotation(Mouse.current.position.ReadValue(), Quaternion.identity);
-        animationVector = _camera.ScreenToWorldPoint(Mouse.current.position.ReadValue()) - new Vector3(_rb.position.x, _rb.position.y, 0f);
+        crosshair.SetPositionAndRotation(Mouse.current.position.ReadValue(), Quaternion.identity);
+        animationVector = playerCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue()) - new Vector3(rb.position.x, rb.position.y, 0f);
 
         animationVector.Normalize();
         float angle = Vector2.Angle(Vector2.right, animationVector);
@@ -72,7 +74,7 @@ public class PlayerController : MonoBehaviour
         if (context.performed)
         {
             GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.FromToRotation(Vector2.right, lookVector));
-            projectile.GetComponent<Rigidbody2D>().velocity = lookVector * 4;
+            projectile.GetComponent<Rigidbody2D>().velocity = lookVector * projectileSpeed;
 
         }
 
@@ -80,10 +82,10 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateParameters()
     {
-        _is_walking_backwards = Vector2.Dot(moveInput, animationVector) < 0;
-        _animator.SetFloat("isWalkingBackwards", _is_walking_backwards ? 1f : 0f);
+        isWalkingBackwards = Vector2.Dot(moveInput, animationVector) < 0;
+        _animator.SetFloat("isWalkingBackwards", isWalkingBackwards ? 1f : 0f);
 
-        if (_is_walking)
+        if (isWalking)
         {
             _animator.SetFloat("InputX", animationVector.x);
             _animator.SetFloat("InputY", animationVector.y);
