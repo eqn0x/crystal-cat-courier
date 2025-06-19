@@ -4,17 +4,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
 
     [SerializeField]private float moveSpeed = 5f;
     private Rigidbody2D _rb;
     private Vector2 moveInput;
     private Vector2 animationVector;
+    private Vector2 lookVector;
     [SerializeField] private Camera _camera;
     [SerializeField] private Transform _crosshair;
     private bool _is_walking;
     private bool _is_walking_backwards;
+
+    [SerializeField] private GameObject projectilePrefab;
 
 
     private Animator _animator;
@@ -56,12 +59,23 @@ public class PlayerMovement : MonoBehaviour
 
         animationVector.Normalize();
         float angle = Vector2.Angle(Vector2.right, animationVector);
-
+        lookVector = animationVector.normalized;
         animationVector = GetAnimationVectorByCrosshairAngle(angle);
 
 
 
         UpdateParameters();
+    }
+
+    public void Fire(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.FromToRotation(Vector2.right, lookVector));
+            projectile.GetComponent<Rigidbody2D>().velocity = lookVector * 4;
+
+        }
+
     }
 
     private void UpdateParameters()
