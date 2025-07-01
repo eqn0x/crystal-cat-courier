@@ -6,29 +6,32 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-
+    // input stuff
     private PlayerInput playerInput;
     private InputAction fireAction;
 
+    // movement
     [SerializeField] private float moveSpeed = 5f;
+    private Vector2 moveInput;
+    private bool isWalking;
+    private bool isWalkingBackwards;
+    private Rigidbody2D rb;
+
+    // look
     [SerializeField] private Camera playerCamera;
     [SerializeField] private Transform crosshair;
-    [SerializeField] private float projectileSpeed = 4f;
-    [SerializeField] private int attackPerSecond = 2;
-    private Rigidbody2D rb;
-    private Vector2 moveInput;
-    private Vector2 animationVector;
     private Vector2 lookVector;
-    private bool isWalking;
+
+    // attack
+    [SerializeField] private int attackPerSecond = 2;
     private bool isShooting;
-    private bool isWalkingBackwards;
 
-
+    // animation
+    private Vector2 animationVector;
 
     private Coroutine shootingCoroutine;
     
-
-    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private ProjectileController projectileController;
 
 
     private Animator _animator;
@@ -37,8 +40,10 @@ public class PlayerController : MonoBehaviour
     {
         playerInput = GetComponent<PlayerInput>();
         fireAction = playerInput.actions["Fire"];
+
         rb = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
+        
         Cursor.visible = false;
     }
     private void OnEnable()
@@ -73,7 +78,6 @@ public class PlayerController : MonoBehaviour
         {
             StopCoroutine(shootingCoroutine);
         }
-
     }
 
     public void Move(InputAction.CallbackContext context)
@@ -87,9 +91,6 @@ public class PlayerController : MonoBehaviour
 
         _animator.SetBool("isWalking", isWalking);
         moveInput = context.ReadValue<Vector2>();
-
-
-
         UpdateParameters();
     }
 
@@ -97,14 +98,10 @@ public class PlayerController : MonoBehaviour
     {
         crosshair.SetPositionAndRotation(Mouse.current.position.ReadValue(), Quaternion.identity);
         animationVector = playerCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue()) - new Vector3(rb.position.x, rb.position.y, 0f);
-
         animationVector.Normalize();
         float angle = Vector2.Angle(Vector2.right, animationVector);
         lookVector = animationVector.normalized;
         animationVector = GetAnimationVectorByCrosshairAngle(angle);
-
-
-
         UpdateParameters();
     }
 
@@ -112,8 +109,8 @@ public class PlayerController : MonoBehaviour
     {
         while (true)
         {
-            GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.FromToRotation(Vector2.right, lookVector));
-            projectile.GetComponent<Rigidbody2D>().velocity = lookVector * projectileSpeed;
+            projectileController.SetProjectileSpawn(transform.position, lookVector);
+            projectileController.FireProjectile();
             yield return new WaitForSeconds(1f / attackPerSecond);
         }
     }
