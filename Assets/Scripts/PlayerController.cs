@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
     private Coroutine shootingCoroutine;
     
     [SerializeField] private ProjectileController projectileController;
+    [SerializeField] private PlayerAnimationController animationController;
 
 
     private Animator _animator;
@@ -42,7 +43,7 @@ public class PlayerController : MonoBehaviour
         fireAction = playerInput.actions["Fire"];
 
         rb = GetComponent<Rigidbody2D>();
-        _animator = GetComponent<Animator>();
+        _animator = GetComponentInChildren<Animator>();
         
         Cursor.visible = false;
     }
