@@ -44,7 +44,8 @@ public class PlayerController : MonoBehaviour
 
         rb = GetComponent<Rigidbody2D>();
         _animator = GetComponentInChildren<Animator>();
-        
+        _animator.speed = 3;
+
         Cursor.visible = false;
     }
     private void OnEnable()
@@ -61,7 +62,17 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        rb.velocity = moveInput * moveSpeed * (isWalkingBackwards ? 0.8f : 1);
+        _animator.speed = 3 * (isWalkingBackwards ? 0.8f : 1);
+    }
+
+    private void FixedUpdate()
+    {
+        float walking_multiplier = (isWalkingBackwards ? 0.8f : 1);
+        Vector2 current_velocity = new Vector2(Mathf.Lerp(rb.velocity.x, moveInput.x * moveSpeed * walking_multiplier, 0.3f), Mathf.Lerp(rb.velocity.y, moveInput.y * moveSpeed * walking_multiplier, 0.3f));
+
+
+        rb.velocity = current_velocity;
+        Debug.Log(rb.velocity);
     }
 
     private void OnFirePerformed(InputAction.CallbackContext context)
