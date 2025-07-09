@@ -8,13 +8,13 @@ public class PlayerController : MonoBehaviour
 {
     // input stuff
     private PlayerInput playerInput;
-    private InputAction fireAction;
+    private InputAction attackAction;
 
     // movement
     [SerializeField] private float moveSpeed = 5f;
     private Vector2 moveInput;
-    private bool isWalking;
-    private bool isWalkingBackwards;
+    private bool isMoving;
+    private bool isMovingBackwards;
     private Rigidbody2D rb;
 
     // look
@@ -31,8 +31,10 @@ public class PlayerController : MonoBehaviour
 
     private Coroutine shootingCoroutine;
     
-    [SerializeField] private ProjectileController projectileController;
-    [SerializeField] private PlayerAnimationController animationController;
+    [SerializeField] private ProjectileController projectileController; // refactor to attack controller
+    [SerializeField] private PlayerAnimationController animationController; // move all animation there
+    [SerializeField] private MovementController movementController; // move all movement there
+    [SerializeField] private InputController inputController;
 
 
     private Animator _animator;
@@ -40,7 +42,7 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
-        fireAction = playerInput.actions["Fire"];
+        attackAction = playerInput.actions["Attack"];
 
         rb = GetComponent<Rigidbody2D>();
         _animator = GetComponentInChildren<Animator>();
@@ -50,38 +52,40 @@ public class PlayerController : MonoBehaviour
     }
     private void OnEnable()
     {
-        fireAction.performed += OnFirePerformed;
-        fireAction.canceled += OnFireCanceled;
+        attackAction.performed += OnAttackPerformed;
+        attackAction.canceled += OnAttackCanceled;
+
+        inputController.OnInputDataChanged += HandleInputData;
     }
 
     private void OnDisable()
     {
-        fireAction.performed -= OnFirePerformed;
-        fireAction.canceled -= OnFireCanceled;
+        attackAction.performed -= OnAttackPerformed;
+        attackAction.canceled -= OnAttackCanceled;
+
+        inputController.OnInputDataChanged -= HandleInputData;
     }
 
     void Update()
     {
-        _animator.speed = 3 * (isWalkingBackwards ? 0.8f : 1);
+        _animator.speed = 3 * (isMovingBackwards ? 0.8f : 1);
     }
 
     private void FixedUpdate()
     {
-        float walking_multiplier = (isWalkingBackwards ? 0.8f : 1);
+        float walking_multiplier = (isMovingBackwards ? 0.8f : 1);
         Vector2 current_velocity = new Vector2(Mathf.Lerp(rb.velocity.x, moveInput.x * moveSpeed * walking_multiplier, 0.3f), Mathf.Lerp(rb.velocity.y, moveInput.y * moveSpeed * walking_multiplier, 0.3f));
 
-
         rb.velocity = current_velocity;
-        Debug.Log(rb.velocity);
     }
 
-    private void OnFirePerformed(InputAction.CallbackContext context)
+    private void OnAttackPerformed(InputAction.CallbackContext context)
     {
         isShooting = true;
         shootingCoroutine = StartCoroutine(FireContinuously());
     }
 
-    private void OnFireCanceled(InputAction.CallbackContext context)
+    private void OnAttackCanceled(InputAction.CallbackContext context)
     {
         if (isShooting == true)
             new WaitForSeconds(1);
@@ -92,28 +96,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void Move(InputAction.CallbackContext context)
+    private void HandleInputData(InputData data)
     {
-        isWalking = true;
-
-        if (context.canceled)
-        {
-            isWalking = false;
-        }
-
-        _animator.SetBool("isWalking", isWalking);
-        moveInput = context.ReadValue<Vector2>();
-        UpdateParameters();
-    }
-
-    public void Look(InputAction.CallbackContext context)
-    {
+        isMoving = data.isMoving;
+        moveInput = data.moveInput;
+        isMovingBackwards = data.isMovingBackwards;
+        animationVector = GetAnimationVectorByCrosshairAngle(Vector2.Angle(Vector2.right, moveInput));
+        Debug.Log(Vector2.Angle(Vector2.right, moveInput));
+        Debug.Log(animationVector);
+        lookVector = data.lookInput;
         crosshair.SetPositionAndRotation(Mouse.current.position.ReadValue(), Quaternion.identity);
-        animationVector = playerCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue()) - new Vector3(rb.position.x, rb.position.y, 0f);
-        animationVector.Normalize();
-        float angle = Vector2.Angle(Vector2.right, animationVector);
-        lookVector = animationVector.normalized;
-        animationVector = GetAnimationVectorByCrosshairAngle(angle);
         UpdateParameters();
     }
 
@@ -129,13 +121,14 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateParameters()
     {
-        isWalkingBackwards = Vector2.Dot(moveInput, animationVector) < 0;
-        _animator.SetFloat("isWalkingBackwards", isWalkingBackwards ? 1f : 0f);
+        _animator.SetBool("isMoving", isMoving);
+        _animator.SetFloat("isMovingBackwards", isMovingBackwards ? 1f : 0f);
 
-        if (isWalking || isShooting)
+        if (isMoving || isShooting)
         {
-            _animator.SetFloat("InputX", animationVector.x);
-            _animator.SetFloat("InputY", animationVector.y);
+            Debug.Log(animationVector);
+            _animator.SetFloat("InputX", isMovingBackwards ? -animationVector.x : animationVector.x);
+            _animator.SetFloat("InputY", isMovingBackwards ? -animationVector.y : animationVector.y);
         }
     }
 
@@ -145,17 +138,17 @@ public class PlayerController : MonoBehaviour
         if (angle < 45f / 2)
             return new Vector2(1f, 0f);
         else if (angle < 45f * 3 / 2)
-            if (animationVector.y > 0)
+            if (moveInput.y > 0)
                 return new Vector2(1f, 1f);
             else
                 return new Vector2(1f, -1f);
         else if(angle < 45f * 5 / 2)
-            if (animationVector.y > 0)
+            if (moveInput.y > 0)
                 return new Vector2(0f, 1f);
             else
                 return new Vector2(0f, -1f);
         else if (angle < 45f * 7 / 2)
-            if (animationVector.y > 0)
+            if (moveInput.y > 0)
                 return new Vector2(-1f, 1f);
             else
                 return new Vector2(-1f, -1f);
