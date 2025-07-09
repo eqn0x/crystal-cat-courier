@@ -10,12 +10,11 @@ public class ProjectileController : MonoBehaviour
 
     public void SetProjectileSpawn(in Vector3 spawnTransformLocal, in Vector3 spawnRotationLocal)
     {
-        spawnRotation = spawnRotationLocal;
+        spawnRotation = spawnRotationLocal.normalized;
     }
 
     public void FireProjectile()
     {
-        //GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.FromToRotation(Vector2.right, spawnRotation));
         GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.FromToRotation(Vector2.right, spawnRotation), transform);
         projectile.GetComponent<Rigidbody2D>().velocity = spawnRotation * projectileSpeed;
     }

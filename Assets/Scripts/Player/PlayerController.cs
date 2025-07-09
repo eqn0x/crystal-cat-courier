@@ -28,7 +28,7 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        projectileController = GetComponent<ProjectileController>();
+        projectileController = GetComponentInChildren<ProjectileController>();
         animationController = GetComponent<PlayerAnimationController>();
         movementController = GetComponent<MovementController>();
         inputController = GetComponent<InputController>();
