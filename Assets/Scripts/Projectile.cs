@@ -9,14 +9,12 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float maxDistance = 10;
     private Rigidbody2D rb;
 
-    // Start is called before the first frame update
     void Start()
     {
         health = maxHealth;
         rb = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         maxDistance -= rb.velocity.magnitude * Time.deltaTime;

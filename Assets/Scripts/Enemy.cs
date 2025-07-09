@@ -6,19 +6,14 @@ public class Enemy : MonoBehaviour
 {
     [SerializeField] private int health, maxHealth = 5;
     [SerializeField] Transform hpDisplay;
-    // Start is called before the first frame update
     void Start()
     {
         health = maxHealth;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
-    public void TakeDamage(int damage)
+
+    public void TakeDamage(in int damage)
     {
         health -= damage;
         //Debug.Log(gameObject.name + ": damage taken = " + damage + ", health remaining = " + health);
