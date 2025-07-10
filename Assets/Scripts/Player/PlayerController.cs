@@ -6,85 +6,42 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    // input stuff
-    private PlayerInput playerInput;
-    private InputAction attackAction;
-
-    // look
     [SerializeField] private Transform crosshair;
-    private Vector2 lookVector;
-
-    // attack
-    [SerializeField] private int attackPerSecond = 2;
-    private bool isShooting;
-
-    private Coroutine shootingCoroutine;
-    
-    private ProjectileController projectileController; // refactor to attackController
+    private AttackController attackController;
     private PlayerAnimationController animationController;
     private MovementController movementController;
     private InputController inputController;
 
+    long counter = 0;
 
     private void Awake()
     {
-        projectileController = GetComponentInChildren<ProjectileController>();
-        animationController = GetComponent<PlayerAnimationController>();
-        movementController = GetComponent<MovementController>();
         inputController = GetComponent<InputController>();
-
-        playerInput = GetComponent<PlayerInput>();
-        attackAction = playerInput.actions["Attack"];
+        movementController = GetComponent<MovementController>();
+        attackController = GetComponent<AttackController>();
+        animationController = GetComponent<PlayerAnimationController>();
     }
     private void OnEnable()
     {
-        attackAction.performed += OnAttackPerformed;
-        attackAction.canceled += OnAttackCanceled;
-
-        inputController.OnInputDataChanged += HandleInputData;
+        inputController.AttackStarted += attackController.StartAttacking;
+        inputController.AttackCanceled += attackController.StopAttacking;
+        inputController.InputDataChanged += HandleInputData;
     }
 
     private void OnDisable()
     {
-        attackAction.performed -= OnAttackPerformed;
-        attackAction.canceled -= OnAttackCanceled;
-
-        inputController.OnInputDataChanged -= HandleInputData;
-    }
-
-    private void OnAttackPerformed(InputAction.CallbackContext context)
-    {
-        isShooting = true;
-        shootingCoroutine = StartCoroutine(FireContinuously());
-    }
-
-    private void OnAttackCanceled(InputAction.CallbackContext context)
-    {
-        if (isShooting == true)
-            new WaitForSeconds(1);
-        isShooting = false;
-        if (shootingCoroutine != null)
-        {
-            StopCoroutine(shootingCoroutine);
-        }
+        inputController.AttackStarted -= attackController.StartAttacking;
+        inputController.AttackCanceled -= attackController.StopAttacking;
+        inputController.InputDataChanged -= HandleInputData;
     }
 
     private void HandleInputData(InputData data)
     {
-        lookVector = data.lookInput;
+        counter++;
         crosshair.SetPositionAndRotation(Mouse.current.position.ReadValue(), Quaternion.identity);
 
         movementController.SetMovementData(data.moveInput, data.isMovingBackwards);
-        animationController.SetMovementData(data.isMoving, data.isMovingBackwards, data.moveInput, isShooting);
-    }
-
-    private IEnumerator FireContinuously()
-    {
-        while (true)
-        {
-            projectileController.SetProjectileSpawn(transform.position, lookVector);
-            projectileController.FireProjectile();
-            yield return new WaitForSeconds(1f / attackPerSecond);
-        }
+        animationController.SetMovementData(data.isMoving, data.isMovingBackwards, data.moveInput, data.isAttacking);
+        attackController.SetLookData(data.lookInput);
     }
 }

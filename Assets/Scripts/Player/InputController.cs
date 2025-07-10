@@ -10,7 +10,7 @@ public struct InputData
     public bool isMoving { get; set; }
     public bool isMovingBackwards { get; set; }
     public Vector2 lookInput { get; set; }
-    public float lookAngle { get; set; }
+    public bool isAttacking { get; set; }
 }
 public class InputController : MonoBehaviour
 {
@@ -18,8 +18,9 @@ public class InputController : MonoBehaviour
     [SerializeField] private Camera _playerCamera;
     private InputData inputData;
 
-    public event Action<InputData> OnInputDataChanged;
-    public event Action OnAttackPerformed;
+    public event Action<InputData> InputDataChanged;
+    public event Action AttackStarted;
+    public event Action AttackCanceled;
 
     private void Awake()
     {
@@ -36,7 +37,7 @@ public class InputController : MonoBehaviour
         inputData.moveInput = context.ReadValue<Vector2>();
         inputData.isMovingBackwards = Vector2.Angle(inputData.moveInput, inputData.lookInput) > 90f;
 
-        OnInputDataChanged?.Invoke(inputData);
+        InputDataChanged?.Invoke(inputData);
     }
     public void Look(InputAction.CallbackContext context)
     {
@@ -44,10 +45,26 @@ public class InputController : MonoBehaviour
         Vector3 worldPos = _playerCamera.ScreenToWorldPoint(mousePos);
 
         inputData.lookInput = (worldPos - transform.position).normalized;
-        inputData.lookAngle = Vector2.Angle(Vector2.right, inputData.lookInput);
 
         inputData.isMovingBackwards = Vector2.Angle(inputData.moveInput, inputData.lookInput) > 90f;
 
-        OnInputDataChanged?.Invoke(inputData);
+        InputDataChanged?.Invoke(inputData);
+    }
+
+    public void OnAttackPerformed(InputAction.CallbackContext context) 
+    {
+        inputData.isAttacking = true;
+        if (context.performed) AttackStarted?.Invoke();
+    }
+
+    public void OnAttackCanceled(InputAction.CallbackContext context)
+    {
+        inputData.isAttacking = false;
+        if (context.canceled) AttackCanceled?.Invoke();
+    }
+
+    public Vector2 GetLookInput()
+    {
+        return inputData.lookInput;
     }
 }
