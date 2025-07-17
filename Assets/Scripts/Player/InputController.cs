@@ -11,6 +11,7 @@ public struct InputData
     public bool isMovingBackwards { get; set; }
     public Vector2 lookInput { get; set; }
     public bool isAttacking { get; set; }
+    public bool isBlocking { get; set; }
 }
 public class InputController : MonoBehaviour
 {
@@ -21,6 +22,10 @@ public class InputController : MonoBehaviour
     public event Action<InputData> InputDataChanged;
     public event Action AttackStarted;
     public event Action AttackCanceled;
+    public event Action BlockStarted;
+    public event Action BlockCanceled;
+    public event Action DodgePerformed;
+    public event Action SpecialPerformed;
 
     private void Awake()
     {
@@ -55,12 +60,44 @@ public class InputController : MonoBehaviour
     {
         inputData.isAttacking = true;
         if (context.performed) AttackStarted?.Invoke();
+        InputDataChanged?.Invoke(inputData);
     }
 
     public void OnAttackCanceled(InputAction.CallbackContext context)
     {
         inputData.isAttacking = false;
         if (context.canceled) AttackCanceled?.Invoke();
+        InputDataChanged?.Invoke(inputData);
+    }
+
+    public void OnBlockPerformed(InputAction.CallbackContext context)
+    {
+        inputData.isBlocking = true;
+        if (context.performed) BlockStarted?.Invoke();
+        InputDataChanged?.Invoke(inputData);
+    }
+
+    public void OnBlockCanceled(InputAction.CallbackContext context)
+    {
+        inputData.isBlocking = false;
+        if (context.canceled) BlockCanceled?.Invoke();
+        InputDataChanged?.Invoke(inputData);
+    }
+
+    public void OnDodge(InputAction.CallbackContext context)
+    {
+        inputData.isBlocking = false;
+        inputData.isAttacking = false;
+        if (context.performed) DodgePerformed?.Invoke();
+        InputDataChanged?.Invoke(inputData);
+    }
+
+    public void OnSpecial(InputAction.CallbackContext context)
+    {
+        inputData.isBlocking = false;
+        inputData.isAttacking = false;
+        if (context.performed) SpecialPerformed?.Invoke();
+        InputDataChanged?.Invoke(inputData);
     }
 
     public Vector2 GetLookInput()

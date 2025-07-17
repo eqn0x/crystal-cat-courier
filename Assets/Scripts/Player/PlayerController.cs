@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     private PlayerAnimationController animationController;
     private MovementController movementController;
     private InputController inputController;
+    private CharacterController characterController;
 
     long counter = 0;
 
@@ -20,11 +21,20 @@ public class PlayerController : MonoBehaviour
         movementController = GetComponent<MovementController>();
         attackController = GetComponent<AttackController>();
         animationController = GetComponent<PlayerAnimationController>();
+        characterController = GetComponent<CharacterController>();
     }
     private void OnEnable()
     {
         inputController.AttackStarted += attackController.StartAttacking;
         inputController.AttackCanceled += attackController.StopAttacking;
+
+        inputController.AttackStarted += characterController.OnAttackPerformed;
+        inputController.AttackCanceled += characterController.OnAttackCanceled;
+        inputController.BlockStarted += characterController.OnBlockPerformed;
+        inputController.BlockCanceled += characterController.OnBlockCanceled;
+        inputController.DodgePerformed += characterController.OnDodgePerformed;
+        inputController.SpecialPerformed += characterController.OnSpecialPerformed;
+
         inputController.InputDataChanged += HandleInputData;
     }
 
@@ -32,6 +42,14 @@ public class PlayerController : MonoBehaviour
     {
         inputController.AttackStarted -= attackController.StartAttacking;
         inputController.AttackCanceled -= attackController.StopAttacking;
+        
+        inputController.AttackStarted -= characterController.OnAttackPerformed;
+        inputController.AttackCanceled -= characterController.OnAttackCanceled;
+        inputController.BlockStarted -= characterController.OnBlockPerformed;
+        inputController.BlockCanceled -= characterController.OnBlockCanceled;
+        inputController.DodgePerformed -= characterController.OnDodgePerformed;
+        inputController.SpecialPerformed -= characterController.OnSpecialPerformed;
+
         inputController.InputDataChanged -= HandleInputData;
     }
 
