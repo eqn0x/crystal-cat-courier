@@ -3042,7 +3042,7 @@ GameObject:
   - component: {fileID: 1500218039}
   - component: {fileID: 1500218038}
   - component: {fileID: 1500218041}
-  - component: {fileID: 1500218040}
+  - component: {fileID: 1500218042}
   - component: {fileID: 1500218036}
   - component: {fileID: 1500218028}
   - component: {fileID: 1500218033}
@@ -3473,18 +3473,6 @@ MonoBehaviour:
   projectilePrefab: {fileID: 63713397940523145, guid: 68012fcd39020f946be600ce8aeee953, type: 3}
   projectileSpeed: 16.6
   attacksPerSecond: 1.96
---- !u!114 &1500218040
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1500218027}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c32b65270f4886458f8e1f848482888, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1500218041
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3495,6 +3483,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ac7537264bcfa304e8ff5b66b069c0f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1500218042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1500218027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c32b65270f4886458f8e1f848482888, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1687096094
