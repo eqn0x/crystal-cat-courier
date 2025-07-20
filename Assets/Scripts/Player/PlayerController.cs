@@ -13,8 +13,6 @@ public class PlayerController : MonoBehaviour
     private InputController inputController;
     private CharacterController characterController;
 
-    long counter = 0;
-
     private void Awake()
     {
         inputController = GetComponent<InputController>();
@@ -55,7 +53,6 @@ public class PlayerController : MonoBehaviour
 
     private void HandleInputData(InputData data)
     {
-        counter++;
         crosshair.SetPositionAndRotation(Mouse.current.position.ReadValue(), Quaternion.identity);
 
         movementController.SetMovementData(data.moveInput, data.isMovingBackwards);

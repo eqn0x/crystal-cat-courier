@@ -15,19 +15,19 @@ public class PlayerAnimationController : MonoBehaviour
         movementController = GetComponent<MovementController>();
     }
 
-    public void SetMovementData(in bool isMoving, in bool isMovingBackwards, in Vector2 moveInput, in bool isShooting)
+    public void SetMovementData(in bool isMoving, in bool isMovingBackwards, in Vector2 moveInput, in bool isAttacking)
     {
         Vector2 animationVector = GetAnimationVectorByCrosshairAngle(Vector2.Angle(Vector2.right, moveInput), moveInput.y);
 
         _animator.speed = animatorSpeed * (isMovingBackwards ? movementController.GetBackwardsMovementFactor() : 1f);
 
         _animator.SetBool("isMoving", isMoving);
-        _animator.SetFloat("isMovingBackwards", isMovingBackwards ? 1f : 0f);
+        _animator.SetFloat("isMovingBackwards", (isAttacking && isMovingBackwards) ? 1f : 0f);
 
-        if (isMoving || isShooting)
+        if (isMoving || isAttacking)
         {
-            _animator.SetFloat("InputX", isMovingBackwards ? -animationVector.x : animationVector.x);
-            _animator.SetFloat("InputY", isMovingBackwards ? -animationVector.y : animationVector.y);
+            _animator.SetFloat("InputX", moveInput.x);
+            _animator.SetFloat("InputY", moveInput.y);
         }
     }
 
