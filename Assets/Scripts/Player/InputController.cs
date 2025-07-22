@@ -31,8 +31,16 @@ public class InputController : MonoBehaviour
 
     private void DebugInputData()
     {
-        Debug.Log("moveInput = " + inputData.moveInput + "; isMoving = " + inputData.isMoving + "; isMovingBackwards = " + inputData.isMovingBackwards +
-            "; lookInput = " + inputData.lookInput + "; isAttacking = " + inputData.isAttacking + "; isBlocking = " + inputData.isBlocking);
+        //Debug.Log("moveInput = " + inputData.moveInput + "; isMoving = " + inputData.isMoving + "; isMovingBackwards = " + inputData.isMovingBackwards +
+          //  "; lookInput = " + inputData.lookInput + "; isAttacking = " + inputData.isAttacking + "; isBlocking = " + inputData.isBlocking);
+    }
+
+    private void UpdateBackwardsMovement()
+    {
+        if (inputData.isAttacking || inputData.isBlocking)
+            inputData.isMovingBackwards = Vector2.Angle(inputData.moveInput, inputData.lookInput) > 90f;
+        else
+            inputData.isMovingBackwards = false;
     }
 
     private void Awake()
@@ -50,10 +58,7 @@ public class InputController : MonoBehaviour
         }
 
         inputData.moveInput = context.ReadValue<Vector2>();
-        if (inputData.isAttacking)
-            inputData.isMovingBackwards = Vector2.Angle(inputData.moveInput, inputData.lookInput) > 90f;
-        else
-            inputData.isMovingBackwards = false;
+        UpdateBackwardsMovement();
 
         DebugInputData();
         InputDataChanged?.Invoke(inputData);
@@ -66,11 +71,8 @@ public class InputController : MonoBehaviour
         Vector3 worldPos = _playerCamera.ScreenToWorldPoint(mousePos);
 
         inputData.lookInput = (worldPos - transform.position).normalized;
-        
-        if (inputData.isAttacking)
-            inputData.isMovingBackwards = Vector2.Angle(inputData.moveInput, inputData.lookInput) > 90f;
-        else
-            inputData.isMovingBackwards = false;
+
+        UpdateBackwardsMovement();
         DebugInputData();
         InputDataChanged?.Invoke(inputData);
     }
@@ -82,6 +84,7 @@ public class InputController : MonoBehaviour
         {
             inputData.isAttacking = true;
             Debug.Log("OnAttackPerformed");
+            UpdateBackwardsMovement();
             DebugInputData();
             AttackStarted?.Invoke();
             InputDataChanged?.Invoke(inputData);
@@ -95,6 +98,7 @@ public class InputController : MonoBehaviour
         {
             inputData.isAttacking = false;
             Debug.Log("OnAttackCanceled");
+            UpdateBackwardsMovement();
             DebugInputData();
             AttackCanceled?.Invoke();
             InputDataChanged?.Invoke(inputData);
@@ -108,6 +112,7 @@ public class InputController : MonoBehaviour
         {
             inputData.isBlocking = true;
             Debug.Log("OnBlockPerformed");
+            UpdateBackwardsMovement();
             DebugInputData();
             BlockStarted?.Invoke();
             InputDataChanged?.Invoke(inputData);
@@ -121,6 +126,7 @@ public class InputController : MonoBehaviour
         {
             inputData.isBlocking = false;
             Debug.Log("OnBlockCanceled");
+            UpdateBackwardsMovement();
             DebugInputData();
             BlockCanceled?.Invoke();
             InputDataChanged?.Invoke(inputData);
@@ -135,6 +141,7 @@ public class InputController : MonoBehaviour
         if (context.performed)
         {
             Debug.Log("OnDodge");
+            UpdateBackwardsMovement();
             DebugInputData();
             DodgePerformed?.Invoke();
             InputDataChanged?.Invoke(inputData);
@@ -149,6 +156,7 @@ public class InputController : MonoBehaviour
         if (context.performed)
         {
             Debug.Log("OnSpecial");
+            UpdateBackwardsMovement();
             DebugInputData();
             SpecialPerformed?.Invoke();
             InputDataChanged?.Invoke(inputData);
